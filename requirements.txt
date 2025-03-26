@@ -1,0 +1,13 @@
+streamlit==1.43.0
+langchain==0.3.18
+langchain_chroma==0.2.2
+langchain_community==0.3.17
+langchain_core==0.3.35
+langchain_groq==0.2.4
+langchain_huggingface==0.1.2
+langchain_text_splitters==0.3.6
+chromadb==0.6.3
+gtts==2.5.4
+tempfile
+base64
+time
