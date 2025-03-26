@@ -1,0 +1,76 @@
+Name: Kunal Patil
+
+Profile / Career Summary:
+Data-driven analyst with a demonstrated ability to transform complex datasets into actionable insights, driving business growth and operational efficiency. Proficient in Python, SQL, end-to-end machine learning/deep learning system design, and generative AI, with expertise in predictive modeling, statistical analysis, and data visualization. Skilled in leveraging advanced analytics and cutting-edge AI technologies to uncover trends, solve complex problems, and deliver impactful solutions. Passionate about developing innovative strategies to support organizational success and growth.
+For more details, explore my projects on GitHub.
+
+Work Experience:
+
+1. Data Analyst at K2 Analytics (Mar 2023 – Present)
+Role: Data analyst for a foreign bank.
+Responsibilities:
+- Data Infrastructure Development: Developed Python/SQL/Excel frameworks for enhanced product, marketing, and business KPI reporting.
+- Cost Optimization: Identified trends leading to ₹6 crore annual net benefit in the credit card business.
+- Compliance Automation: Developed a Python/SQL system for precise KYC verification, reducing processing time by 50%.
+- Customer Segmentation: Engineered a segmentation model for 9M+ customers, enabling personalized marketing.
+- Team Leadership: Led a team of two analysts, achieving 100% on-time delivery with 98% accuracy.
+Tools Used: Python, SQL, MS Office.
+
+2. Data Analyst at FatakPay Digital Pvt. Ltd (Oct 2022 – Jan 2023)
+Role: Data analyst.
+Responsibilities:
+- Automated TAT Reporting: Optimized reporting processes from lead generation to disbursement by integrating telecaller metrics for incentive calculation and target tracking.
+- Address Data Extraction: Extracted address data from 300,000+ coordinates using Python, enhancing loan recovery.
+- Business Reporting Automation: Automated daily business reports, saving 10+ hours per day and enabling teams to focus on strategic tasks.
+
+Personal Projects:
+
+1. RAG Chatbot with PDF Uploads and Chat History
+Project Overview: Developed a Streamlit web app for uploading PDFs and querying their content using retrieval-augmented generation (RAG).
+Key Features:
+- PDF Handling: Used PyPDFLoader and RecursiveCharacterTextSplitter to process and split PDFs into chunks.
+- AI Integration: Leveraged ChatGroq with selectable models (Gemma2-9B-IT, Llama-3.1-8B-Instant) for generating responses.
+- Retrieval: Employed HuggingFaceEmbeddings and Chroma for vector-based document retrieval.
+- Chat Features: Implemented session-based chat history with ChatMessageHistory for context-aware conversations.
+- User Interface: Designed an intuitive interface with PDF uploads, model selection, and query input.
+
+2. Data Science Salary Estimator
+Project Overview: Developed a salary prediction tool for data science roles using Glassdoor data.
+Key Features:
+- Data Cleaning: Parsed salary data, extracted company ratings, and engineered features for skills, job location, company age, and job description length.
+- Exploratory Analysis: Revealed correlations between job description length and company age, and visualized job role distributions across sectors.
+- Model Building: Evaluated Lasso Regression and RandomForestRegressor, optimized using RandomSearchCV, and selected RandomForest for its superior performance (MAE: 13.69).
+- Deployment: Deployed the final model on Streamlit.
+
+3. Customer Churn Prediction (Imbalanced Dataset)
+Project Overview: Developed a predictive model for customer churn targeting subscription to a term deposit.
+Key Features:
+- Data Insights: Conducted exploratory analysis revealing outliers in balance and duration, with job type as a key predictor and a low 17% defaulter rate.
+- Data Preprocessing: Transformed binary features (yes/no) to 1/0, encoded categorical variables with OneHotEncoder, and scaled numeric features using StandardScaler.
+- Model Selection: Evaluated multiple models and selected GradientBoostingClassifier, training it on both imbalanced and balanced datasets via BalancedBaggingClassifier.
+- Performance Outcomes: Provided two tailored models, enabling businesses to prioritize churn detection or subscriber identification based on strategic needs.
+
+4. Time Series Analysis
+Project Overview: Developed Jupyter notebooks for time series analysis focusing on stock prices and trading volumes.
+Key Features:
+- Data Retrieval: Utilized Pandas DataReader to retrieve historical stock data for companies such as Google (GOOGL), Tesla (TSLA), Ford, and GM.
+- Exploratory Analysis: Visualized stock price trends and trading volumes to identify significant trading days.
+- Technical Analysis: Implemented moving averages (simple and exponential), calculated market capitalization, and used rolling and expanding windows to study price trends.
+- Advanced Insights: Created box plots, computed daily percentage changes, and analyzed volatility with histograms and KDE plots.
+
+5. IMDb Movie Review Sentiment Analysis
+Project Overview: Developed a simple recurrent neural network (RNN) to classify IMDb movie reviews as positive or negative.
+Key Features:
+- Model Development: Utilized TensorFlow for building the RNN.
+- Data Preprocessing: Tokenized reviews and applied padding to standardize input lengths.
+- NLP Exploration: Investigated word embeddings to understand text representation.
+- Deployment: Created an interactive Streamlit app for real-time sentiment prediction.
+
+6. Movie Recommendation System
+Project Overview: Developed a content-based movie recommendation system using movie data from the TMDb API.
+Key Features:
+- Data Collection: Collected movie metadata such as overviews, cast, and genre details from the TMDb API.
+- Data Preprocessing: Cleaned raw data by removing extra spaces and applying stemming to standardize text.
+- Feature Extraction: Employed NLP techniques to extract key features from movie data.
+- Similarity Calculation: Used cosine similarity to measure relationships between movies.
+- Recommendation Functionality: Built a function that takes a movie title as input and returns a list of similar movies based on calculated similarity scores.
