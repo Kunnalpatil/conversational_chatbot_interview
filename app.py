@@ -114,7 +114,7 @@ conversationnal_rag_chain = RunnableWithMessageHistory(
 #         return None
     
 
-# user_input = st.text_input('How can I help you?')
+# user_input = st.text_input('What would you like to know about me ?')
 # if user_input:
 #     session_history = get_session_history(session_id)
 #     response = conversationnal_rag_chain.invoke(
