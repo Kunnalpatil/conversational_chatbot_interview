@@ -1,206 +1,5 @@
-# import pysqlite3
-# import sys
-# sys.modules['sqlite3'] = pysqlite3
-# import streamlit as st
-# from langchain.chains import create_history_aware_retriever, create_retrieval_chain
-# from langchain.chains.combine_documents import create_stuff_documents_chain
-# from langchain_chroma import Chroma
-# from langchain_community.chat_message_histories import ChatMessageHistory
-# from langchain_core.chat_history import BaseChatMessageHistory
-# from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-# from langchain_groq import ChatGroq
-# from langchain_core.runnables.history import RunnableWithMessageHistory
-# from langchain_huggingface import HuggingFaceEmbeddings
-# from langchain_community.document_loaders import TextLoader
-# from langchain_text_splitters import RecursiveCharacterTextSplitter
-# import os
-# import chromadb.api
-# chromadb.api.client.SharedSystemClient.clear_system_cache()
-# from dotenv import load_dotenv
-
-
-# load_dotenv()
-# os.environ['HF_TOKEN'] = os.getenv('HF_TOKEN')
-# GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-
-# st.session_state.embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-
-# ## set up streamlit app
-# st.title("Conversational Chatbot with speech support")
-
-# # Initialize the language model
-# llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name='gemma2-9b-it')
-
-# # chat interface 
-# session_id = st.text_input("Session ID : Enter a new session id to start a new conversation without chat-history", value="Default")
-
-# def get_session_history(session: str) -> BaseChatMessageHistory:
-#     if session_id not in st.session_state.store:
-#         st.session_state.store[session_id] = ChatMessageHistory()
-#     return st.session_state.store[session_id]
-
-# if 'store' not in st.session_state:
-#     st.session_state.store = {}
-
-# # Load and split documents
-# loader = TextLoader('My_data.txt')
-# data = loader.load()
-# text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-# splits = text_splitter.split_documents(data)
-
-# # Create embeddings and vector database
-# embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-# vector_db = Chroma.from_documents(documents=splits, embedding=st.session_state.embeddings)
-# retriver = vector_db.as_retriever()
-
-# ## prompt to read store history and create a new prompt with history 
-# contextulize_qa_system_prompt = (
-#         "Given a chat history and the latest user question"
-#         "which might reference context in the chat history, "
-#         "formulate a standalone question which can be understood "
-#         "without the chat history. Do NOT answer the question, "
-#         "just reformulate it if needed, otherwise return it as is."
-# )
-# contextulize_qa_prompt = ChatPromptTemplate.from_messages(
-#     [
-#         ("system", contextulize_qa_system_prompt),
-#         MessagesPlaceholder('chat_history'),
-#         ('human', "{input}")
-#     ]
-# )  
-
-# history_aware_retriver = create_history_aware_retriever(llm, retriver, contextulize_qa_prompt) 
-
-# ## Answer question
-# system_prompt = (
-#     """You are an AI answering as kunal in an interview.
-#         Based on the context provided about me, respond to the question asked 
-#         in a concise, natural, and authentic way, as if you were me. 
-#         Use a professional yet friendly tone. 
-#         Do NOT make up information that is not in the context provided.Say you don't know
-#         if you don't have enough information. 
-#         AGAIN , DO NOT MAKE UP INFORMATION THAT IS NOT IN THE CONTEXT PROVIDED.
-#         to give a believable answer."""
-#             "\n\n"
-#             "{context}"
-# )
-
-# qa_prompt = ChatPromptTemplate.from_messages(
-#     [
-#         ('system', system_prompt),
-#         MessagesPlaceholder('chat_history'),
-#         ('human', "{input}")
-#     ]
-# )
-
-# question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
-# rag_chain = create_retrieval_chain(history_aware_retriver, question_answer_chain)
-
-# conversationnal_rag_chain = RunnableWithMessageHistory(
-#     rag_chain, get_session_history,
-#     input_messages_key="input",
-#     history_messages_key="chat_history",
-#     output_messages_key="answer"
-# )
-
-
-# # def text_to_speech(text):
-# #     try:
-# #         with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as tmpfile:
-# #             tts = gTTS(text=text, lang='en')  # 'en' for English
-# #             tts.save(tmpfile.name)
-# #             return tmpfile.name
-# #     except Exception as e:
-# #         return None
-    
-
-# # user_input = st.text_input('What would you like to know about me ?')
-# # if user_input:
-# #     session_history = get_session_history(session_id)
-# #     response = conversationnal_rag_chain.invoke(
-# #         {'input': user_input},
-# #         config={
-# #             "configurable": {"session_id": session_id}
-# #         }
-# #     )
-# #     st.write(response['answer'])  # Display the answer on the web app
-
-# #     with st.spinner("Generating speech..."):
-# #         audio_file_path = text_to_speech(response['answer'])
-# #         if audio_file_path:
-# #             st.audio(audio_file_path, format='audio/mp3')
-# #         else:
-# #             st.warning("Failed to generate speech.")
-
-
-# from gtts import gTTS
-# import tempfile
-# import base64
-# import os
-# import streamlit as st
-# from streamlit.components.v1 import html
-# import time
-
-# def text_to_speech(text):
-#     """
-#     Convert text to speech using gTTS and return the audio data as bytes.
-#     """
-#     try:
-#         # Create a temporary MP3 file
-#         with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as tmpfile:
-#             tts = gTTS(text=text, lang='en')  # 'en' for English
-#             tts.save(tmpfile.name)
-#             tmpfile_path = tmpfile.name
-        
-#         # Read the audio data into memory
-#         with open(tmpfile_path, 'rb') as f:
-#             audio_data = f.read()
-        
-#         # Clean up the temporary file
-#         os.remove(tmpfile_path)
-#         return audio_data
-#     except Exception as e:
-#         return None
-
-# # Main Streamlit app
-# user_input = st.text_input('What would you like to know about me?')
-# if user_input:
-#     session_history = get_session_history(session_id)
-#     response = conversationnal_rag_chain.invoke(
-#         {'input': user_input},
-#         config={
-#             "configurable": {"session_id": session_id}
-#         }
-#     )
-#     st.write(response['answer'])  # Display the answer on the web app
-
-#     with st.spinner("Generating speech..."):
-#         audio_data = text_to_speech(response['answer'])
-#         if audio_data:
-#             # Encode audio data to base64
-#             audio_base64 = base64.b64encode(audio_data).decode('utf-8')
-#             # Create a unique ID for each audio element
-#             unique_id = str(int(time.time() * 1000))
-#             # Create HTML with audio and script to ensure playback
-#             audio_html = f'''
-#             <audio id="audio_{unique_id}" style="display:none;">
-#               <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
-#             </audio>
-#             <script>
-#               document.getElementById("audio_{unique_id}").play();
-#             </script>
-#             '''
-#             # Render the HTML to play the audio automatically
-#             html(audio_html, height=0)
-#         else:
-#             st.warning("Failed to generate speech.")
-
-
-
-
-
-import sys
 import pysqlite3
+import sys
 sys.modules['sqlite3'] = pysqlite3
 import streamlit as st
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
@@ -214,98 +13,75 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_core.caches import BaseCache  # Import BaseCache for ChatGroq
 import os
+import chromadb.api
+chromadb.api.client.SharedSystemClient.clear_system_cache()
 from dotenv import load_dotenv
-from gtts import gTTS
-import tempfile
-import base64
-import streamlit.components.v1 as components
-import time
 
-# Load environment variables (for local testing; Streamlit Cloud uses secrets)
 load_dotenv()
-HF_TOKEN = os.getenv('HF_TOKEN')
-GROQ_API_KEY = os.getenv('GROQ_API_KEY')
+os.environ['HF_TOKEN'] = os.getenv('HF_TOKEN')
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
+st.session_state.embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
-# Set up embeddings in session state
-if 'embeddings' not in st.session_state:
-    st.session_state.embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+## set up streamlit app
+st.title("Conversational Chatbot with speech support")
 
-# Streamlit app setup
-st.title("Conversational Chatbot with Speech Support")
+# Initialize the language model
+llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name='gemma2-9b-it')
 
-# Initialize the language model with explicit rebuild
-try:
-    llm = ChatGroq(
-        groq_api_key=GROQ_API_KEY,
-        model="gemma2-9b-it",
-        temperature=0.7
-    )
-    ChatGroq.model_rebuild()  # Rebuild to resolve Pydantic issue
-except Exception as e:
-    st.error(f"Failed to initialize ChatGroq: {e}")
-    st.stop()
-
-# Session history management
-session_id = st.text_input("Session ID: Enter a new session ID to start a new conversation without chat-history", value="Default")
+# chat interface 
+session_id = st.text_input("Session ID : Enter a new session id to start a new conversation without chat-history", value="Default")
 
 def get_session_history(session: str) -> BaseChatMessageHistory:
-    if session not in st.session_state.store:
-        st.session_state.store[session] = ChatMessageHistory()
-    return st.session_state.store[session]
+    if session_id not in st.session_state.store:
+        st.session_state.store[session_id] = ChatMessageHistory()
+    return st.session_state.store[session_id]
 
 if 'store' not in st.session_state:
     st.session_state.store = {}
 
-# Load and process documents
-try:
-    loader = TextLoader('My_data.txt')
-    data = loader.load()
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    splits = text_splitter.split_documents(data)
-except Exception as e:
-    st.error(f"Error loading My_data.txt: {e}")
-    st.stop()
+# Load and split documents
+loader = TextLoader('My_data.txt')
+data = loader.load()
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+splits = text_splitter.split_documents(data)
 
-# Create vector database
-try:
-    vector_db = Chroma.from_documents(documents=splits, embedding=st.session_state.embeddings)
-    retriever = vector_db.as_retriever()
-except Exception as e:
-    st.error(f"Error creating vector database: {e}")
-    st.stop()
+# Create embeddings and vector database
+embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+vector_db = Chroma.from_documents(documents=splits, embedding=st.session_state.embeddings)
+retriver = vector_db.as_retriever()
 
-# Contextualize QA prompt
-contextualize_qa_system_prompt = (
-    "Given a chat history and the latest user question "
-    "which might reference context in the chat history, "
-    "formulate a standalone question which can be understood "
-    "without the chat history. Do NOT answer the question, "
-    "just reformulate it if needed, otherwise return it as is."
+## prompt to read store history and create a new prompt with history 
+contextulize_qa_system_prompt = (
+        "Given a chat history and the latest user question"
+        "which might reference context in the chat history, "
+        "formulate a standalone question which can be understood "
+        "without the chat history. Do NOT answer the question, "
+        "just reformulate it if needed, otherwise return it as is."
 )
-contextualize_qa_prompt = ChatPromptTemplate.from_messages(
+contextulize_qa_prompt = ChatPromptTemplate.from_messages(
     [
-        ("system", contextualize_qa_system_prompt),
+        ("system", contextulize_qa_system_prompt),
         MessagesPlaceholder('chat_history'),
         ('human', "{input}")
     ]
-)
+)  
 
-history_aware_retriever = create_history_aware_retriever(llm, retriever, contextualize_qa_prompt)
+history_aware_retriver = create_history_aware_retriever(llm, retriver, contextulize_qa_prompt) 
 
-# Answer question prompt
+## Answer question
 system_prompt = (
-    """You are an AI answering as Kunal in an interview.
-    Based on the context provided about me, respond to the question asked 
-    in a concise, natural, and authentic way, as if you were me. 
-    Use a professional yet friendly tone. 
-    Do NOT make up information that is not in the context provided. Say you don't know
-    if you don’t have enough information. 
-    AGAIN, DO NOT MAKE UP INFORMATION THAT IS NOT IN THE CONTEXT PROVIDED."""
-    "\n\n"
-    "{context}"
+    """You are an AI answering as kunal in an interview.
+        Based on the context provided about me, respond to the question asked 
+        in a concise, natural, and authentic way, as if you were me. 
+        Use a professional yet friendly tone. 
+        Do NOT make up information that is not in the context provided.Say you don't know
+        if you don't have enough information. 
+        AGAIN , DO NOT MAKE UP INFORMATION THAT IS NOT IN THE CONTEXT PROVIDED.
+        to give a believable answer."""
+            "\n\n"
+            "{context}"
 )
 
 qa_prompt = ChatPromptTemplate.from_messages(
@@ -317,56 +93,103 @@ qa_prompt = ChatPromptTemplate.from_messages(
 )
 
 question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
-rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
+rag_chain = create_retrieval_chain(history_aware_retriver, question_answer_chain)
 
-conversational_rag_chain = RunnableWithMessageHistory(
+conversationnal_rag_chain = RunnableWithMessageHistory(
     rag_chain, get_session_history,
     input_messages_key="input",
     history_messages_key="chat_history",
     output_messages_key="answer"
 )
 
-# Text-to-speech function
+
+# def text_to_speech(text):
+#     try:
+#         with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as tmpfile:
+#             tts = gTTS(text=text, lang='en')  # 'en' for English
+#             tts.save(tmpfile.name)
+#             return tmpfile.name
+#     except Exception as e:
+#         return None
+    
+
+# user_input = st.text_input('How can I help you?')
+# if user_input:
+#     session_history = get_session_history(session_id)
+#     response = conversationnal_rag_chain.invoke(
+#         {'input': user_input},
+#         config={
+#             "configurable": {"session_id": session_id}
+#         }
+#     )
+#     st.write(response['answer'])  # Display the answer on the web app
+
+#     with st.spinner("Generating speech..."):
+#         audio_file_path = text_to_speech(response['answer'])
+#         if audio_file_path:
+#             st.audio(audio_file_path, format='audio/mp3')
+#         else:
+#             st.warning("Failed to generate speech.")
+
+
+from gtts import gTTS
+import tempfile
+import base64
+import os
+import streamlit as st
+from streamlit.components.v1 import html
+import time
+
 def text_to_speech(text):
+    """
+    Convert text to speech using gTTS and return the audio data as bytes.
+    """
     try:
+        # Create a temporary MP3 file
         with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as tmpfile:
-            tts = gTTS(text=text, lang='en')
+            tts = gTTS(text=text, lang='en')  # 'en' for English
             tts.save(tmpfile.name)
             tmpfile_path = tmpfile.name
+        
+        # Read the audio data into memory
         with open(tmpfile_path, 'rb') as f:
             audio_data = f.read()
+        
+        # Clean up the temporary file
         os.remove(tmpfile_path)
         return audio_data
     except Exception as e:
-        st.error(f"Error generating audio: {e}")
         return None
 
-# Main Streamlit interface
-user_input = st.text_input('What would you like to know about me?')
+# Main Streamlit app
+user_input = st.text_input('How can I help you?')
 if user_input:
     session_history = get_session_history(session_id)
-    with st.spinner("Generating response..."):
-        try:
-            response = conversational_rag_chain.invoke(
-                {'input': user_input},
-                config={"configurable": {"session_id": session_id}}
-            )
-            st.write(response['answer'])
+    response = conversationnal_rag_chain.invoke(
+        {'input': user_input},
+        config={
+            "configurable": {"session_id": session_id}
+        }
+    )
+    st.write(response['answer'])  # Display the answer on the web app
 
-            audio_data = text_to_speech(response['answer'])
-            if audio_data:
-                audio_base64 = base64.b64encode(audio_data).decode('utf-8')
-                unique_id = str(int(time.time() * 1000))
-                audio_html = f'''
-                <audio id="audio_{unique_id}" style="display:none;">
-                  <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
-                </audio>
-                <script>
-                  document.getElementById("audio_{unique_id}").play();
-                </script>
-                '''
-                components.html(audio_html, height=0)
-            else:
-                st.warning("Failed to generate speech.")
-        except Exception as e:
-            st.error(f"Error processing request: {e}")
+    with st.spinner("Generating speech..."):
+        audio_data = text_to_speech(response['answer'])
+        if audio_data:
+            # Encode audio data to base64
+            audio_base64 = base64.b64encode(audio_data).decode('utf-8')
+            # Create a unique ID for each audio element
+            unique_id = str(int(time.time() * 1000))
+            # Create HTML with audio and script to ensure playback
+            audio_html = f'''
+            <audio id="audio_{unique_id}" style="display:none;">
+              <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
+            </audio>
+            <script>
+              document.getElementById("audio_{unique_id}").play();
+            </script>
+            '''
+            # Render the HTML to play the audio automatically
+            html(audio_html, height=0)
+        else:
+            st.warning("Failed to generate speech.")
