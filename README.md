@@ -1,5 +1,7 @@
 # Conversational Chatbot Interview
 
+Try the app : [https://conversationalchatbotinterview.streamlit.app/](https://conversationalchatbotinterview.streamlit.app/)
+
 This repository contains a conversational chatbot designed for interview purposes. It is implemented in Python using Streamlit and various language models.
 
 ## Introduction
