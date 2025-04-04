@@ -200,12 +200,9 @@
 
 
 
-
-# Force pysqlite3-binary to override sqlite3 before any imports that use it
 import sys
 import pysqlite3
 sys.modules['sqlite3'] = pysqlite3
-
 import streamlit as st
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -218,6 +215,7 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.caches import BaseCache  # Import BaseCache explicitly
 import os
 from dotenv import load_dotenv
 from gtts import gTTS
@@ -231,7 +229,6 @@ load_dotenv()
 HF_TOKEN = os.getenv('HF_TOKEN')
 GROQ_API_KEY = os.getenv('GROQ_API_KEY')
 
-
 # Set up embeddings in session state
 if 'embeddings' not in st.session_state:
     st.session_state.embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
@@ -239,13 +236,15 @@ if 'embeddings' not in st.session_state:
 # Streamlit app setup
 st.title("Conversational Chatbot with Speech Support")
 
-# Initialize the language model
+# Initialize the language model with explicit rebuild
 try:
     llm = ChatGroq(
         groq_api_key=GROQ_API_KEY,
         model="gemma2-9b-it",
         temperature=0.7
     )
+    # Explicitly rebuild the model to resolve Pydantic issue
+    ChatGroq.model_rebuild()
 except Exception as e:
     st.error(f"Failed to initialize ChatGroq: {e}")
     st.stop()
