@@ -200,7 +200,12 @@
 
 
 
+
+# Force pysqlite3-binary to override sqlite3 before any imports that use it
 import sys
+import pysqlite3
+sys.modules['sqlite3'] = pysqlite3
+
 import streamlit as st
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -225,6 +230,7 @@ import time
 load_dotenv()
 HF_TOKEN = os.getenv('HF_TOKEN')
 GROQ_API_KEY = os.getenv('GROQ_API_KEY')
+
 
 # Set up embeddings in session state
 if 'embeddings' not in st.session_state:
