@@ -1,6 +1,7 @@
-import pysqlite3
 import sys
+import pysqlite3
 sys.modules['sqlite3'] = pysqlite3
+
 import streamlit as st
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -47,10 +48,14 @@ data = loader.load()
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 splits = text_splitter.split_documents(data)
 
-# Create embeddings and vector database
+# Create embeddings and vector database with error handling
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-vector_db = Chroma.from_documents(documents=splits, embedding=st.session_state.embeddings)
-retriver = vector_db.as_retriever()
+try:
+    vector_db = Chroma.from_documents(documents=splits, embedding=st.session_state.embeddings)
+    retriver = vector_db.as_retriever()
+except Exception as e:
+    st.error(f"Error creating vector database: {e}")
+    st.stop()
 
 ## prompt to read store history and create a new prompt with history 
 contextulize_qa_system_prompt = (
@@ -101,36 +106,6 @@ conversationnal_rag_chain = RunnableWithMessageHistory(
     history_messages_key="chat_history",
     output_messages_key="answer"
 )
-
-
-# def text_to_speech(text):
-#     try:
-#         with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as tmpfile:
-#             tts = gTTS(text=text, lang='en')  # 'en' for English
-#             tts.save(tmpfile.name)
-#             return tmpfile.name
-#     except Exception as e:
-#         return None
-    
-
-# user_input = st.text_input('How can I help you?')
-# if user_input:
-#     session_history = get_session_history(session_id)
-#     response = conversationnal_rag_chain.invoke(
-#         {'input': user_input},
-#         config={
-#             "configurable": {"session_id": session_id}
-#         }
-#     )
-#     st.write(response['answer'])  # Display the answer on the web app
-
-#     with st.spinner("Generating speech..."):
-#         audio_file_path = text_to_speech(response['answer'])
-#         if audio_file_path:
-#             st.audio(audio_file_path, format='audio/mp3')
-#         else:
-#             st.warning("Failed to generate speech.")
-
 
 from gtts import gTTS
 import tempfile
