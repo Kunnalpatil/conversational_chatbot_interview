@@ -199,7 +199,6 @@
 
 
 
-
 import sys
 import pysqlite3
 sys.modules['sqlite3'] = pysqlite3
@@ -215,7 +214,7 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_core.caches import BaseCache  # Import BaseCache explicitly
+from langchain_core.caches import BaseCache  # Import BaseCache for ChatGroq
 import os
 from dotenv import load_dotenv
 from gtts import gTTS
@@ -228,6 +227,7 @@ import time
 load_dotenv()
 HF_TOKEN = os.getenv('HF_TOKEN')
 GROQ_API_KEY = os.getenv('GROQ_API_KEY')
+
 
 # Set up embeddings in session state
 if 'embeddings' not in st.session_state:
@@ -243,8 +243,7 @@ try:
         model="gemma2-9b-it",
         temperature=0.7
     )
-    # Explicitly rebuild the model to resolve Pydantic issue
-    ChatGroq.model_rebuild()
+    ChatGroq.model_rebuild()  # Rebuild to resolve Pydantic issue
 except Exception as e:
     st.error(f"Failed to initialize ChatGroq: {e}")
     st.stop()
